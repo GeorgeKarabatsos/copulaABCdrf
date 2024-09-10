@@ -1,0 +1,366 @@
+rm(list = ls())
+install.packages('pdist');	library('pdist') # To compute Euclidean distances for rejection ABC
+install.packages('kde1d');	library('kde1d')	# for kernel CDF() used in Kolmogorov Smirnov test
+library('ks')	# for kde()
+install.packages('MASS');			library('MASS')		# For mvrnorm().
+install.packages('mvtnorm');		library('mvtnorm')	# Multivariate Normal and t Distributions
+install.packages('drf');		library('drf')
+
+
+for (simStudy in 1 : 30)	{ # simStudy = 1 # For testing.
+	if (simStudy == 1)	{
+		postEtheta.RejectionABC.simulations.mean	= 	matrix(NA, nrow = 30, ncol = 2)
+		postEtheta.RejectionABC.simulations.sd		= 	matrix(NA, nrow = 30, ncol = 2)
+		postMEDtheta.RejectionABC.simulations.mean	= 	matrix(NA, nrow = 30, ncol = 2)
+		postMEDtheta.RejectionABC.simulations.sd	= 	matrix(NA, nrow = 30, ncol = 2)
+		postMODEtheta.RejectionABC.simulations.mean	= 	matrix(NA, nrow = 30, ncol = 2)
+		postMODEtheta.RejectionABC.simulations.sd	= 	matrix(NA, nrow = 30, ncol = 2)
+		MLEtheta.RejectionABC.simulations.mean		= 	matrix(NA, nrow = 30, ncol = 2)
+		MLEtheta.RejectionABC.simulations.sd		= 	matrix(NA, nrow = 30, ncol = 2)
+		postSDtheta.RejectionABC.simulations.mean	= 	matrix(NA, nrow = 30, ncol = 2)
+		postSDtheta.RejectionABC.simulations.sd		= 	matrix(NA, nrow = 30, ncol = 2)
+		cover95.RejectionABC.simulations.mean		= 	matrix(NA, nrow = 30, ncol = 2)
+		cover50.RejectionABC.simulations.mean		= 	matrix(NA, nrow = 30, ncol = 2)
+		MAE.postEtheta.RejectionABC.simulations 	= 	matrix(NA, nrow = 30, ncol = 2)
+		MSE.postEtheta.RejectionABC.simulations 	= 	matrix(NA, nrow = 30, ncol = 2)
+		MAE.postMEDtheta.RejectionABC.simulations	= 	matrix(NA, nrow = 30, ncol = 2)
+		MSE.postMEDtheta.RejectionABC.simulations	= 	matrix(NA, nrow = 30, ncol = 2)
+		MAE.postMODEtheta.RejectionABC.simulations	= 	matrix(NA, nrow = 30, ncol = 2)
+		MSE.postMODEtheta.RejectionABC.simulations	= 	matrix(NA, nrow = 30, ncol = 2)
+		MAE.MLEtheta.RejectionABC.simulations		= 	matrix(NA, nrow = 30, ncol = 2)
+		MSE.MLEtheta.RejectionABC.simulations		= 	matrix(NA, nrow = 30, ncol = 2)
+		proportionTimesSummarySelected.simulations	= 	matrix(NA, nrow = 30, ncol = 3)
+		simConditionNames	=	c(	'Price, n = 50  nodes, n_sim = 5',
+									'Price, n = 50  nodes, n_sim = 16',
+									'Price, n = 50  nodes, n_sim = 25',
+									'Price, n = 50  nodes, n_sim = 37',
+									'Price, n = 50  nodes, n_sim = 50',
+									'Price, n = 300 nodes, n_sim = 30',
+									'Price, n = 300 nodes, n_sim = 100',
+									'Price, n = 300 nodes, n_sim = 150',
+									'Price, n = 300 nodes, n_sim = 225',
+									'Price, n = 300 nodes, n_sim = 300',
+									'NLPA,  n = 50  nodes, n_sim = 5',
+									'NLPA,  n = 50  nodes, n_sim = 16',
+									'NLPA,  n = 50  nodes, n_sim = 25',
+									'NLPA,  n = 50  nodes, n_sim = 37',
+									'NLPA,  n = 50  nodes, n_sim = 50',
+									'NLPA,  n = 300 nodes, n_sim = 30',
+									'NLPA,  n = 300 nodes, n_sim = 100',
+									'NLPA,  n = 300 nodes, n_sim = 150',
+									'NLPA,  n = 300 nodes, n_sim = 225',
+									'NLPA,  n = 300 nodes, n_sim = 300',
+									'DMR,   n = 50  nodes, n_sim = 5',
+									'DMR,   n = 50  nodes, n_sim = 16',
+									'DMR,   n = 50  nodes, n_sim = 25',
+									'DMR,   n = 50  nodes, n_sim = 37',
+									'DMR,   n = 50  nodes, n_sim = 50',
+									'DMR,   n = 300 nodes, n_sim = 30',
+									'DMR,   n = 300 nodes, n_sim = 100',
+									'DMR,   n = 300 nodes, n_sim = 150',
+									'DMR,   n = 300 nodes, n_sim = 225',
+									'DMR,   n = 300 nodes, n_sim = 300')
+		rownames(postEtheta.RejectionABC.simulations.mean)		=	simConditionNames
+		rownames(postEtheta.RejectionABC.simulations.sd)		=	simConditionNames
+		rownames(postMEDtheta.RejectionABC.simulations.mean)	=	simConditionNames
+		rownames(postMEDtheta.RejectionABC.simulations.sd)		=	simConditionNames
+		rownames(postMODEtheta.RejectionABC.simulations.mean)	=	simConditionNames
+		rownames(postMODEtheta.RejectionABC.simulations.sd)	=	simConditionNames
+		rownames(MLEtheta.RejectionABC.simulations.mean)		=	simConditionNames
+		rownames(MLEtheta.RejectionABC.simulations.sd)			=	simConditionNames
+		rownames(postSDtheta.RejectionABC.simulations.mean)	=	simConditionNames
+		rownames(postSDtheta.RejectionABC.simulations.sd)		=	simConditionNames
+		rownames(cover95.RejectionABC.simulations.mean)		=	simConditionNames
+		rownames(cover50.RejectionABC.simulations.mean)		=	simConditionNames
+		rownames(MAE.postEtheta.RejectionABC.simulations)		=	simConditionNames
+		rownames(MSE.postEtheta.RejectionABC.simulations)		=	simConditionNames
+		rownames(MAE.postMEDtheta.RejectionABC.simulations)	=	simConditionNames
+		rownames(MSE.postMEDtheta.RejectionABC.simulations)	=	simConditionNames
+		rownames(MAE.postMODEtheta.RejectionABC.simulations)	=	simConditionNames
+		rownames(MSE.postMODEtheta.RejectionABC.simulations)	=	simConditionNames
+		rownames(MAE.MLEtheta.RejectionABC.simulations)		=	simConditionNames
+		rownames(MSE.MLEtheta.RejectionABC.simulations)		=	simConditionNames
+		rownames(proportionTimesSummarySelected.simulations)	=	simConditionNames
+		
+		colnames(postEtheta.RejectionABC.simulations.mean)		=	paste('theta', 1 : 2, sep = '')
+		colnames(postEtheta.RejectionABC.simulations.sd)		=	paste('theta', 1 : 2, sep = '')
+		colnames(postMEDtheta.RejectionABC.simulations.mean)	=	paste('theta', 1 : 2, sep = '')
+		colnames(postMEDtheta.RejectionABC.simulations.sd)		=	paste('theta', 1 : 2, sep = '')
+		colnames(postMODEtheta.RejectionABC.simulations.mean)	=	paste('theta', 1 : 2, sep = '')
+		colnames(postMODEtheta.RejectionABC.simulations.sd)		=	paste('theta', 1 : 2, sep = '')
+		colnames(MLEtheta.RejectionABC.simulations.mean)		=	paste('theta', 1 : 2, sep = '')
+		colnames(MLEtheta.RejectionABC.simulations.sd)			=	paste('theta', 1 : 2, sep = '')
+		colnames(postSDtheta.RejectionABC.simulations.mean)		=	paste('theta', 1 : 2, sep = '')
+		colnames(postSDtheta.RejectionABC.simulations.sd)		=	paste('theta', 1 : 2, sep = '')
+		colnames(cover95.RejectionABC.simulations.mean)			=	paste('theta', 1 : 2, sep = '')
+		colnames(cover50.RejectionABC.simulations.mean)			=	paste('theta', 1 : 2, sep = '')
+		colnames(MAE.postEtheta.RejectionABC.simulations)		=	paste('theta', 1 : 2, sep = '')
+		colnames(MSE.postEtheta.RejectionABC.simulations)		=	paste('theta', 1 : 2, sep = '')
+		colnames(MAE.postMEDtheta.RejectionABC.simulations)		=	paste('theta', 1 : 2, sep = '')
+		colnames(MSE.postMEDtheta.RejectionABC.simulations)		=	paste('theta', 1 : 2, sep = '')
+		colnames(MAE.postMODEtheta.RejectionABC.simulations)	=	paste('theta', 1 : 2, sep = '')
+		colnames(MSE.postMODEtheta.RejectionABC.simulations)	=	paste('theta', 1 : 2, sep = '')
+		colnames(MAE.MLEtheta.RejectionABC.simulations)			=	paste('theta', 1 : 2, sep = '')
+		colnames(MSE.MLEtheta.RejectionABC.simulations)			=	paste('theta', 1 : 2, sep = '')
+		colnames(proportionTimesSummarySelected.simulations)	=	paste('summary', 1 : 3, sep = '')
+	}
+#	Price:
+	if (simStudy == 1) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\Price\\n = 50 nodes\\n_sim = 5')}
+	if (simStudy == 2) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\Price\\n = 50 nodes\\n_sim = 16')}
+	if (simStudy == 3) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\Price\\n = 50 nodes\\n_sim = 25')}
+	if (simStudy == 4) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\Price\\n = 50 nodes\\n_sim = 37')}
+	if (simStudy == 5) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\Price\\n = 50 nodes\\n_sim = 50')}
+	if (simStudy == 6) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\Price\\n = 300 nodes\\n_sim = 30')}
+	if (simStudy == 7) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\Price\\n = 300 nodes\\n_sim = 100')}
+	if (simStudy == 8) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\Price\\n = 300 nodes\\n_sim = 150')}
+	if (simStudy == 9) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\Price\\n = 300 nodes\\n_sim = 225')}
+	if (simStudy == 10) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\Price\\n = 300 nodes\\n_sim = 300')}
+#	NLPA:
+	if (simStudy == 11) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\NLPA\\n = 50 nodes\\n_sim = 5')}
+	if (simStudy == 12) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\NLPA\\n = 50 nodes\\n_sim = 16')}
+	if (simStudy == 13) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\NLPA\\n = 50 nodes\\n_sim = 25')}
+	if (simStudy == 14) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\NLPA\\n = 50 nodes\\n_sim = 37')}
+	if (simStudy == 15) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\NLPA\\n = 50 nodes\\n_sim = 50')}
+	if (simStudy == 16) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\NLPA\\n = 300 nodes\\n_sim = 30')}
+	if (simStudy == 17) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\NLPA\\n = 300 nodes\\n_sim = 100')}
+	if (simStudy == 18) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\NLPA\\n = 300 nodes\\n_sim = 150')}
+	if (simStudy == 19) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\NLPA\\n = 300 nodes\\n_sim = 225')}
+	if (simStudy == 20) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\NLPA\\n = 300 nodes\\n_sim = 300')}
+#	DMR:
+	if (simStudy == 21) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\DMR\\n = 50 nodes\\n_sim = 5')}
+	if (simStudy == 22) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\DMR\\n = 50 nodes\\n_sim = 16')}
+	if (simStudy == 23) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\DMR\\n = 50 nodes\\n_sim = 25')}
+	if (simStudy == 24) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\DMR\\n = 50 nodes\\n_sim = 37')}
+	if (simStudy == 25) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\DMR\\n = 50 nodes\\n_sim = 50')}
+	if (simStudy == 26) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\DMR\\n = 300 nodes\\n_sim = 30')}
+	if (simStudy == 27) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\DMR\\n = 300 nodes\\n_sim = 100')}
+	if (simStudy == 28) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\DMR\\n = 300 nodes\\n_sim = 150')}
+	if (simStudy == 29) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\DMR\\n = 300 nodes\\n_sim = 225')}
+	if (simStudy == 30) {setwd('C:\\Users\\George Karabatsos\\Desktop\\George\\PAPERS\\copulaABCdrf\\code ABCnetwork\\Results\\Simulation Results\\DMR\\n = 300 nodes\\n_sim = 300')}
+
+	RDataFiles		=	list.files(path = ".", pattern = "\\.RData$")
+
+	postEtheta.RejectionABC.simulations 			=	c()
+	postMEDtheta.RejectionABC.simulations 			=	c()
+	postMODEtheta.RejectionABC.simulations 			=	c()
+	MLEtheta.RejectionABC.simulations 				=	c()
+	postSDtheta.RejectionABC.simulations 			=	c()
+	cover95.RejectionABC.simulations				=	c()
+	cover50.RejectionABC.simulations				=	c()
+	KS.Dn.RejectionABC.simulations					=	c()
+	KS.stat.RejectionABC.simulations				=	c()
+	L1error.postEtheta.RejectionABC.simulations		=	c()
+	L2error.postEtheta.RejectionABC.simulations		=	c()
+	L1error.postMEDtheta.RejectionABC.simulations	=	c()
+	L2error.postMEDtheta.RejectionABC.simulations	=	c()
+	L1error.postMODEtheta.RejectionABC.simulations	= 	c()
+	L2error.postMODEtheta.RejectionABC.simulations	= 	c()
+	L1error.MLEtheta.RejectionABC.simulations		= 	c()
+	L2error.MLEtheta.RejectionABC.simulations		= 	c()
+	variable_selected.RejectionABC.simulations		=	c()
+	
+
+	# Loop through the 10 replicas for the given network model, n nodes, and n_sim.
+	for (fileNum in 1 : length(RDataFiles)){# fileNum = 1 # For testing.
+		load(RDataFiles[fileNum])
+		#
+		# Do the rejection ABC analysis:
+		
+		# sy = MPLE.table was used for ERGM, Price, DMC models.
+		# sy = sy.table used for NLPA, DMR models.		
+		# For Price model:
+		if (((simStudy >= 1) & (simStudy <= 10))) {sy.table	=	MPLE.table}
+		# For NLPA or DMR model, we already have sy = sy.table, so no action is needed in this case.
+		
+		variable_importance.RejectionABC	=	c(variable_importance(drf(X = sy.table, Y = theta.table)))
+		variable_selected.RejectionABC		=	rank(variable_importance.RejectionABC) > 1
+		#variable_importance(drf.forest)# Calculate a simple measure of ’importance’ for each feature.
+		# A simple weighted sum of how many times feature i was split on at each depth in the forest.
+		# variableImportance(drf.forest)# (VERY SLOW) compute an mmd-based variable importance for the drf fit.
+		#
+		variable_selected.RejectionABC.simulations	=	rbind(variable_selected.RejectionABC.simulations,   variable_selected.RejectionABC)
+	
+		euclideanDistances			=	 as.matrix(pdist(sy.table[, variable_selected.RejectionABC], Y = matrix(X.test[variable_selected.RejectionABC], nrow = 1) ))
+		theta.table.RejectionABC	=	theta.table[euclideanDistances <= quantile(euclideanDistances, probs = .02),]
+		# Above, retained 1%,2%, or 3% of thetas with summary statistics sy nearest to observed dataset summaries sx.		
+
+		# Below function is used because in one case of Price n = 50 and n_sim = 5 and .01 quantile of simulated distances,
+		# the reference table only consisted of one row (retention of 1 simuated sample)
+		if (!is.matrix(theta.table.RejectionABC)) {theta.table.RejectionABC = theta.table[euclideanDistances <= quantile(euclideanDistances, probs = .02),]}
+		#
+		postEtheta.RejectionABC		=	colMeans(theta.table.RejectionABC)
+		postMEDtheta.RejectionABC	=	apply(theta.table.RejectionABC, 2, median)
+		#
+		# Below function is used because in one case of Price n = 50 and n_sim = 5 and .02 quantile of simuated distances,
+		# kde() was not able to compute because the number of retained MPLE (sy) samples
+		# was less than the number of model paramaters (due to lack of positive definiteness) 
+		if (nrow(theta.table.RejectionABC) > length(truth)){
+			post.kde.RejectionABC	=	kde(x=theta.table.RejectionABC, eval.points=theta.table.RejectionABC, positive=FALSE, unit.interval=FALSE)$estimate}
+		if (nrow(theta.table.RejectionABC) <= length(truth)){
+			for (k in 1:length(truth)) { # k = 1;	# For testing
+				if (k == 1) {post.kde.RejectionABC = matrix(NA, nrow = nrow(theta.table.RejectionABC), ncol =  length(truth))}
+				fit.RejectionABC			= 	kde1d(theta.table.RejectionABC[,k])
+				post.kde.RejectionABC[,k]	=	dkde1d(theta.table.RejectionABC[,k], fit.RejectionABC)	}
+			post.kde.RejectionABC	=	apply(post.kde.RejectionABC, 1, prod)
+		}
+		#
+		postMODEtheta.RejectionABC	= 	theta.table.RejectionABC[which.max(post.kde.RejectionABC),]		
+		# For Price n = 50:
+		if ((simStudy >= 1)  & (simStudy <= 5))	{priorPDFs.RejectionABC	=	apply(cbind(dunif(theta.table.RejectionABC[,1], min = 0.9, max = 1.1), 	dunif(theta.table.RejectionABC[,2], min = 0, max = .10)),1,prod)}	
+		#  For Price n = 300:
+		if ((simStudy >= 6)  & (simStudy <= 10))	{priorPDFs.RejectionABC	=	apply(cbind(dunif(theta.table.RejectionABC[,1], min = 0.9, max = 1.1), 	dunif(theta.table.RejectionABC[,2], min = 0, max = .20)),1,prod)}
+		# For NLPA: 
+		if ((simStudy >= 11) & (simStudy <= 20))	{priorPDFs.RejectionABC	=	apply(cbind(dunif(theta.table.RejectionABC[,1], min = 0, max = 3), 		dunif(theta.table.RejectionABC[,2], min = 0, max = .20)),1,prod)}
+		# For DMR: 
+		if ((simStudy >= 21) & (simStudy <= 30))	{priorPDFs.RejectionABC	=	apply(cbind(dunif(theta.table.RejectionABC[,1], min = 0.15, max = .35), dunif(theta.table.RejectionABC[,2], min = 0, max = 1)),1,prod)}
+		likelihoods.RejectionABC	=	post.kde.RejectionABC / priorPDFs.RejectionABC
+		MLEtheta.RejectionABC		=	theta.table.RejectionABC[which.max(likelihoods.RejectionABC),]
+		postSDtheta.RejectionABC	=	apply(theta.table.RejectionABC, 2, sd)	
+		#
+		postEtheta.RejectionABC.simulations		=	rbind(postEtheta.RejectionABC.simulations, postEtheta.RejectionABC)
+		postMEDtheta.RejectionABC.simulations	=	rbind(postMEDtheta.RejectionABC.simulations, postMEDtheta.RejectionABC)
+		postMODEtheta.RejectionABC.simulations	=	rbind(postMODEtheta.RejectionABC.simulations, postMODEtheta.RejectionABC)
+		MLEtheta.RejectionABC.simulations		=	rbind(MLEtheta.RejectionABC.simulations, MLEtheta.RejectionABC)
+		postSDtheta.RejectionABC.simulations	=	rbind(postSDtheta.RejectionABC.simulations, postSDtheta.RejectionABC)
+		
+		# Compute 95%(50% coverage for each individual parameter.
+		postQtheta.RejectionABC					= 	apply(theta.table.RejectionABC, 2, quantile, probs = c(.025, .25, .75, .975))
+		cover95.RejectionABC.simulations0		=	c()
+		cover50.RejectionABC.simulations0		=	c()
+		#
+		for (k in 1:length(truth)) { # k = 1;	# For testing
+			if (k == 1){postQtheta.RejectionABC	= apply(theta.table.RejectionABC, 2, quantile, probs = c(.025, .25, .75, .975))}
+			# Check for 95%(50%) coverage:
+			q.lo	=	postQtheta.RejectionABC[1,k]
+			q.hi	=	postQtheta.RejectionABC[4,k]
+			cover95.RejectionABC.simulations0 	= 	c(cover95.RejectionABC.simulations0, as.numeric(q.lo <= truth[k] & q.hi >= truth[k]))
+			q.lo	=	postQtheta.RejectionABC[2,k];
+			q.hi	=	postQtheta.RejectionABC[3,k]
+			cover50.RejectionABC.simulations0 	= 	c(cover50.RejectionABC.simulations0, as.numeric(q.lo <= truth[k] & q.hi >= truth[k]))
+		}
+		cover95.RejectionABC.simulations		=	rbind(cover95.RejectionABC.simulations, 	cover95.RejectionABC.simulations0)
+		cover50.RejectionABC.simulations		=	rbind(cover50.RejectionABC.simulations, 	cover50.RejectionABC.simulations0)
+		L1error.postEtheta.RejectionABC.simulations		=	rbind(L1error.postEtheta.RejectionABC.simulations, 	abs(postEtheta.RejectionABC		- truth) 		)
+		L2error.postEtheta.RejectionABC.simulations		=	rbind(L2error.postEtheta.RejectionABC.simulations,    	(postEtheta.RejectionABC 	- truth)^2 	)
+		L1error.postMEDtheta.RejectionABC.simulations	=	rbind(L1error.postMEDtheta.RejectionABC.simulations, 	abs(postMEDtheta.RejectionABC	- truth) 		)
+		L2error.postMEDtheta.RejectionABC.simulations	=	rbind(L2error.postMEDtheta.RejectionABC.simulations, 		(postMEDtheta.RejectionABC 	- truth)^2 	)
+		L1error.postMODEtheta.RejectionABC.simulations	=	rbind(L1error.postMODEtheta.RejectionABC.simulations, 	abs(postMODEtheta.RejectionABC	- truth) 		)
+		L2error.postMODEtheta.RejectionABC.simulations	=	rbind(L2error.postMODEtheta.RejectionABC.simulations, 		(postMODEtheta.RejectionABC 	- truth)^2 	)
+		L1error.MLEtheta.RejectionABC.simulations			=	rbind(L1error.MLEtheta.RejectionABC.simulations, 		abs(MLEtheta.RejectionABC	- truth) 		)
+		L2error.MLEtheta.RejectionABC.simulations			=	rbind(L2error.MLEtheta.RejectionABC.simulations, 			(MLEtheta.RejectionABC 	- truth)^2 	)
+		#
+		if (fileNum == length(RDataFiles))	{
+			postEtheta.RejectionABC.simulations.mean0	=	matrix(apply(postEtheta.RejectionABC.simulations, 2, mean), nrow = 1)
+			postEtheta.RejectionABC.simulations.sd0		=	matrix(apply(postEtheta.RejectionABC.simulations, 2, sd), nrow = 1)
+			postMEDtheta.RejectionABC.simulations.mean0	=	matrix(apply(postMEDtheta.RejectionABC.simulations, 2, mean), nrow = 1)
+			postMEDtheta.RejectionABC.simulations.sd0	=	matrix(apply(postMEDtheta.RejectionABC.simulations, 2, sd), nrow = 1)
+			postMODEtheta.RejectionABC.simulations.mean0=	matrix(apply(postMODEtheta.RejectionABC.simulations, 2, mean), nrow = 1)
+			postMODEtheta.RejectionABC.simulations.sd0	=	matrix(apply(postMODEtheta.RejectionABC.simulations, 2, sd), nrow = 1)
+			MLEtheta.RejectionABC.simulations.mean0		=	matrix(apply(MLEtheta.RejectionABC.simulations, 2, mean), nrow = 1)
+			MLEtheta.RejectionABC.simulations.sd0		=	matrix(apply(MLEtheta.RejectionABC.simulations, 2, sd), nrow = 1)
+			postSDtheta.RejectionABC.simulations.mean0	=	matrix(apply(postSDtheta.RejectionABC.simulations, 2, mean), nrow = 1)
+			postSDtheta.RejectionABC.simulations.sd0	=	matrix(apply(postSDtheta.RejectionABC.simulations, 2, sd), nrow = 1)
+			cover95.RejectionABC.simulations.mean0		=	matrix(apply(cover95.RejectionABC.simulations, 2, mean), nrow = 1)
+			cover50.RejectionABC.simulations.mean0		=	matrix(apply(cover50.RejectionABC.simulations, 2, mean), nrow = 1)
+			MAE.postEtheta.RejectionABC.simulations0	=	matrix(apply(L1error.postEtheta.RejectionABC.simulations, 2, mean), nrow = 1) # Mean Absolute Error (MAE)
+			MSE.postEtheta.RejectionABC.simulations0	=	matrix(apply(L2error.postEtheta.RejectionABC.simulations, 2, mean), nrow = 1) # Mean Squared Error (MSE)
+			MAE.postMEDtheta.RejectionABC.simulations0	=	matrix(apply(L1error.postMEDtheta.RejectionABC.simulations, 2, mean), nrow = 1) # Mean Absolute Error (MAE)
+			MSE.postMEDtheta.RejectionABC.simulations0	=	matrix(apply(L2error.postMEDtheta.RejectionABC.simulations, 2, mean), nrow = 1) # Mean Squared Error (MSE)
+			MAE.postMODEtheta.RejectionABC.simulations0	=	matrix(apply(L1error.postMODEtheta.RejectionABC.simulations, 2, mean), nrow = 1) # Mean Absolute Error (MAE)
+			MSE.postMODEtheta.RejectionABC.simulations0	=	matrix(apply(L2error.postMODEtheta.RejectionABC.simulations, 2, mean), nrow = 1) # Mean Squared Error (MSE)
+			MAE.MLEtheta.RejectionABC.simulations0		=	matrix(apply(L1error.MLEtheta.RejectionABC.simulations, 2, mean), nrow = 1) # Mean Absolute Error (MAE)
+			MSE.MLEtheta.RejectionABC.simulations0		=	matrix(apply(L2error.MLEtheta.RejectionABC.simulations, 2, mean), nrow = 1) # Mean Squared Error (MSE)
+			proportionTimesSummarySelected0				= 	matrix(apply(ifelse(variable_selected.RejectionABC.simulations == TRUE, 1, 0), 2, mean), nrow = 1)
+		}
+		#
+		# Display progress.
+		print(paste("Finished file # ", fileNum, " of 10, of Simulation study ", simStudy, " of 30.", sep = ''))
+		flush.console()
+	}
+	postEtheta.RejectionABC.simulations.mean[simStudy, 1:length(truth)]		=	round(postEtheta.RejectionABC.simulations.mean0, 2)
+	postEtheta.RejectionABC.simulations.sd[simStudy, 1:length(truth)]			=	round(postEtheta.RejectionABC.simulations.sd0, 2)
+	postMEDtheta.RejectionABC.simulations.mean[simStudy, 1:length(truth)]	=	round(postMEDtheta.RejectionABC.simulations.mean0, 2)
+	postMEDtheta.RejectionABC.simulations.sd[simStudy, 1:length(truth)]		=	round(postMEDtheta.RejectionABC.simulations.sd0, 2)
+	postMODEtheta.RejectionABC.simulations.mean[simStudy, 1:length(truth)]	=	round(postMODEtheta.RejectionABC.simulations.mean0, 2)
+	postMODEtheta.RejectionABC.simulations.sd[simStudy, 1:length(truth)]		=	round(postMODEtheta.RejectionABC.simulations.sd0, 2)
+	MLEtheta.RejectionABC.simulations.mean[simStudy, 1:length(truth)]			=	round(MLEtheta.RejectionABC.simulations.mean0, 2)
+	MLEtheta.RejectionABC.simulations.sd[simStudy, 1:length(truth)]			=	round(MLEtheta.RejectionABC.simulations.sd0, 2)
+	postSDtheta.RejectionABC.simulations.mean[simStudy, 1:length(truth)]		=	round(postSDtheta.RejectionABC.simulations.mean0, 2)
+	postSDtheta.RejectionABC.simulations.sd[simStudy, 1:length(truth)]		=	round(postSDtheta.RejectionABC.simulations.sd0, 2)
+	cover95.RejectionABC.simulations.mean[simStudy, 1:length(truth)]			=	round(cover95.RejectionABC.simulations.mean0, 2)
+	cover50.RejectionABC.simulations.mean[simStudy, 1:length(truth)]			=	round(cover50.RejectionABC.simulations.mean0, 2)
+	MAE.postEtheta.RejectionABC.simulations[simStudy, 1:length(truth)]		= 	round(MAE.postEtheta.RejectionABC.simulations0, 2)
+	MSE.postEtheta.RejectionABC.simulations[simStudy, 1:length(truth)]		= 	round(MSE.postEtheta.RejectionABC.simulations0, 2)
+	MAE.postMEDtheta.RejectionABC.simulations[simStudy, 1:length(truth)]		= 	round(MAE.postMEDtheta.RejectionABC.simulations0, 2)
+	MSE.postMEDtheta.RejectionABC.simulations[simStudy, 1:length(truth)]		= 	round(MSE.postMEDtheta.RejectionABC.simulations0, 2)
+	MAE.postMODEtheta.RejectionABC.simulations[simStudy, 1:length(truth)]	= 	round(MAE.postMODEtheta.RejectionABC.simulations0, 2)
+	MSE.postMODEtheta.RejectionABC.simulations[simStudy, 1:length(truth)]	= 	round(MSE.postMODEtheta.RejectionABC.simulations0, 2)
+	MAE.MLEtheta.RejectionABC.simulations[simStudy, 1:length(truth)]			= 	round(MAE.MLEtheta.RejectionABC.simulations0, 2)
+	MSE.MLEtheta.RejectionABC.simulations[simStudy, 1:length(truth)]			= 	round(MSE.MLEtheta.RejectionABC.simulations0, 2)
+	proportionTimesSummarySelected.simulations[simStudy, 1 : 3] 				= 	round(proportionTimesSummarySelected0, 2)
+}
+
+
+
+#postEtheta.RejectionABC.simulations.mean
+#postEtheta.RejectionABC.simulations.sd
+postEtheta.RejectionABC.simulations.meansd	=	matrix(paste(postEtheta.RejectionABC.simulations.mean, ' (', postEtheta.RejectionABC.simulations.sd, ')', sep=''),nrow=nrow(postEtheta.RejectionABC.simulations.mean),ncol=ncol(postEtheta.RejectionABC.simulations.mean))
+rownames(postEtheta.RejectionABC.simulations.meansd)	=	simConditionNames
+colnames(postEtheta.RejectionABC.simulations.meansd)	=	paste('theta', 1 : 2, sep = '')
+noquote(postEtheta.RejectionABC.simulations.meansd)
+#postMEDtheta.RejectionABC.simulations.mean
+#postMEDtheta.RejectionABC.simulations.sd	
+postMEDtheta.RejectionABC.simulations.meansd	=	matrix(paste(postMEDtheta.RejectionABC.simulations.mean, ' (', postMEDtheta.RejectionABC.simulations.sd, ')', sep=''),nrow=nrow(postEtheta.RejectionABC.simulations.mean),ncol=ncol(postEtheta.RejectionABC.simulations.mean))
+rownames(postMEDtheta.RejectionABC.simulations.meansd)	=	simConditionNames
+colnames(postMEDtheta.RejectionABC.simulations.meansd)	=	paste('theta', 1 : 2, sep = '')
+noquote(postMEDtheta.RejectionABC.simulations.meansd)
+#postMODEtheta.RejectionABC.simulations.mean	
+#postMODEtheta.RejectionABC.simulations.sd	
+postMODEtheta.RejectionABC.simulations.meansd	=	matrix(paste(postMODEtheta.RejectionABC.simulations.mean, ' (', postMODEtheta.RejectionABC.simulations.sd, ')', sep=''),nrow=nrow(postEtheta.RejectionABC.simulations.mean),ncol=ncol(postEtheta.RejectionABC.simulations.mean))
+rownames(postMODEtheta.RejectionABC.simulations.meansd)	=	simConditionNames
+colnames(postMODEtheta.RejectionABC.simulations.meansd)	=	paste('theta', 1 : 2, sep = '')
+noquote(postMODEtheta.RejectionABC.simulations.meansd)
+#MLEtheta.RejectionABC.simulations.mean	
+#MLEtheta.RejectionABC.simulations.sd		
+MLEtheta.RejectionABC.simulations.meansd	=	matrix(paste(MLEtheta.RejectionABC.simulations.mean, ' (', MLEtheta.RejectionABC.simulations.sd, ')', sep=''),nrow=nrow(postEtheta.RejectionABC.simulations.mean),ncol=ncol(postEtheta.RejectionABC.simulations.mean))
+rownames(MLEtheta.RejectionABC.simulations.meansd)	=	simConditionNames
+colnames(MLEtheta.RejectionABC.simulations.meansd)	=	paste('theta', 1 : 2, sep = '')
+noquote(MLEtheta.RejectionABC.simulations.meansd)
+#postSDtheta.RejectionABC.simulations.mean	
+#postSDtheta.RejectionABC.simulations.sd		
+postSDtheta.RejectionABC.simulations.meansd	=	matrix(paste(postSDtheta.RejectionABC.simulations.mean, ' (', postSDtheta.RejectionABC.simulations.sd, ')', sep=''),nrow=nrow(postEtheta.RejectionABC.simulations.mean),ncol=ncol(postEtheta.RejectionABC.simulations.mean))
+rownames(postSDtheta.RejectionABC.simulations.meansd)	=	simConditionNames
+colnames(postSDtheta.RejectionABC.simulations.meansd)	=	paste('theta', 1 : 2, sep = '')
+noquote(postSDtheta.RejectionABC.simulations.meansd)
+#cover95.RejectionABC.simulations.mean		
+#cover50.RejectionABC.simulations.mean		
+cover95.50.RejectionABC.simulations.mean	=	matrix(paste(cover95.RejectionABC.simulations.mean	, ' (', cover50.RejectionABC.simulations.mean, ')', sep=''),nrow=nrow(postEtheta.RejectionABC.simulations.mean),ncol=ncol(postEtheta.RejectionABC.simulations.mean))
+rownames(cover95.50.RejectionABC.simulations.mean)	=	simConditionNames
+colnames(cover95.50.RejectionABC.simulations.mean)	=	paste('theta', 1 : 2, sep = '')
+noquote(cover95.50.RejectionABC.simulations.mean)
+#MAE.postEtheta.RejectionABC.simulations		
+#MSE.postEtheta.RejectionABC.simulations	
+MAE.MSE.postEtheta.RejectionABC.simulations		=	matrix(paste(MAE.postEtheta.RejectionABC.simulations, ' (', MSE.postEtheta.RejectionABC.simulations, ')', sep=''),nrow=nrow(postEtheta.RejectionABC.simulations.mean),ncol=ncol(postEtheta.RejectionABC.simulations.mean))
+rownames(MAE.MSE.postEtheta.RejectionABC.simulations)	=	simConditionNames
+colnames(MAE.MSE.postEtheta.RejectionABC.simulations)	=	paste('theta', 1 : 2, sep = '')
+noquote(MAE.MSE.postEtheta.RejectionABC.simulations)
+#MAE.postMEDtheta.RejectionABC.simulations	
+#MSE.postMEDtheta.RejectionABC.simulations	
+MAE.MSE.postMEDtheta.RejectionABC.simulations	=	matrix(paste(MAE.postMEDtheta.RejectionABC.simulations, ' (', MSE.postMEDtheta.RejectionABC.simulations, ')', sep=''),nrow=nrow(postEtheta.RejectionABC.simulations.mean),ncol=ncol(postEtheta.RejectionABC.simulations.mean))
+rownames(MAE.MSE.postMEDtheta.RejectionABC.simulations)	=	simConditionNames
+colnames(MAE.MSE.postMEDtheta.RejectionABC.simulations)	=	paste('theta', 1 : 2, sep = '')
+noquote(MAE.MSE.postMEDtheta.RejectionABC.simulations)
+#MAE.postMODEtheta.RejectionABC.simulations
+#MSE.postMODEtheta.RejectionABC.simulations	
+MAE.MSE.postMODEtheta.RejectionABC.simulations	=	matrix(paste(MAE.postMODEtheta.RejectionABC.simulations, ' (', MSE.postMODEtheta.RejectionABC.simulations, ')', sep=''),nrow=nrow(postEtheta.RejectionABC.simulations.mean),ncol=ncol(postEtheta.RejectionABC.simulations.mean))
+rownames(MAE.MSE.postMODEtheta.RejectionABC.simulations)	=	simConditionNames
+colnames(MAE.MSE.postMODEtheta.RejectionABC.simulations)	=	paste('theta', 1 : 2, sep = '')
+noquote(MAE.MSE.postMODEtheta.RejectionABC.simulations)
+#MAE.MLEtheta.RejectionABC.simulations		
+#MSE.MLEtheta.RejectionABC.simulations		
+MAE.MSE.MLEtheta.RejectionABC.simulations	=	matrix(paste(MAE.MLEtheta.RejectionABC.simulations, ' (', MSE.MLEtheta.RejectionABC.simulations, ')', sep=''),nrow=nrow(postEtheta.RejectionABC.simulations.mean),ncol=ncol(postEtheta.RejectionABC.simulations.mean))
+rownames(MAE.MSE.MLEtheta.RejectionABC.simulations)	=	simConditionNames
+colnames(MAE.MSE.MLEtheta.RejectionABC.simulations)	=	paste('theta', 1 : 2, sep = '')
+noquote(MAE.MSE.MLEtheta.RejectionABC.simulations)
+#
+proportionTimesSummarySelected.simulations
